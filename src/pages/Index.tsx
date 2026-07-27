@@ -27,7 +27,7 @@ import { Mail, Linkedin, Github, SquareArrowOutUpRightIcon, Download } from "luc
 import { toast } from "@/hooks/use-toast";
 import "@/App.css";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import CertificateAlbum from "@/components/CertificateAlbum";
+import CertificateDeck from "@/components/CertificateDeck";
 import { certificateAlbums } from "@/data/certificates";
 import Gallery from "@/components/Gallery";
 import { ProjectCard } from "@/components/ProejctCard";
@@ -134,12 +134,6 @@ const Section = ({
 
 export default function Index() {
   const [sending, setSending] = useState(false);
-  const [openAlbumId, setOpenAlbumId] = useState<string | null>(null);
-
-  const handleToggle = (albumId: string) => {
-    setOpenAlbumId((prev) => (prev === albumId ? null : albumId));
-  };
-
   const totalCerts = certificateAlbums.reduce(
     (sum, a) => sum + a.certificates.length,
     0
@@ -221,7 +215,9 @@ export default function Index() {
               </div>
             </div>
 
-            <div className="text-left">
+            {/* min-w-0: without it this grid item refuses to shrink below the skills
+                strip's max-content width and blows out the page on mobile */}
+            <div className="min-w-0 text-left">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
                 Hi, I'm Johnlord Mique
               </h1>
@@ -230,14 +226,16 @@ export default function Index() {
                 I specialize in problem-solving, designing, and crafting applications that
                 blend performance with great user experience.
               </p>
-              <br />
-
               {/* Skills carousel ─ lazy + async so they don't block paint */}
-              <div className="skills-wrapper">
+              <div className="skills-wrapper mt-6">
                 <div className="skills">
-                 
                   {[...skills, ...skills].map((skill, index) => (
-                    <div key={index} className="relative group inline-block">
+                    <div
+                      key={index}
+                      className="group relative"
+                      // Second copy is purely decorative — hide from screen readers
+                      aria-hidden={index >= skills.length}
+                    >
                       <img
                         src={skill.src}
                         alt={skill.name}
@@ -246,15 +244,14 @@ export default function Index() {
                         decoding="async"
                         width={40}
                         height={40}
-                        className="transition-transform"
-                        // Second copy is purely decorative — hide from screen readers
-                        aria-hidden={index >= skills.length}
+                        className="transition-transform duration-200 group-hover:scale-110"
                       />
                       <span className="
-                        absolute left-1/2 -translate-x-1/2 mb-3 z-50
+                        absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2
                         px-2.5 py-1 text-xs font-semibold text-white
-                        bg-gray-800 rounded-sm whitespace-nowrap pointer-events-none
-                        opacity-0 group-hover:opacity-100 transition-opacity
+                        bg-gray-800 rounded-md whitespace-nowrap pointer-events-none
+                        opacity-0 translate-y-1 transition-all duration-200
+                        group-hover:opacity-100 group-hover:translate-y-0
                         after:content-[''] after:absolute after:bottom-full after:left-1/2 after:-translate-x-1/2
                         after:border-[5px] after:border-transparent after:border-b-gray-800
                       ">
@@ -294,7 +291,7 @@ export default function Index() {
           </header>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((p, i) => (
-              <ProjectCard key={i} p={p} i={i} />
+              <ProjectCard key={i} p={p} />
             ))}
           </div>
         </Section>
@@ -308,16 +305,7 @@ export default function Index() {
               highlights from ongoing learning.
             </p>
           </header>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {certificateAlbums.map((album) => (
-              <CertificateAlbum
-                key={album.id}
-                album={album}
-                isOpen={openAlbumId === album.id}
-                onToggle={() => handleToggle(album.id)}
-              />
-            ))}
-          </div>
+          <CertificateDeck albums={certificateAlbums} />
         </Section>
 
         {/* ── Gallery ───────────────────────────────────────────────────────── */}
